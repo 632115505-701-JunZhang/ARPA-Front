@@ -1,128 +1,135 @@
 <template>
-   <el-container>
-  <el-header>登录</el-header>
-  <el-main>
+  <el-form
+    label-width="70px"
+    class="Login-container"
+    :model="form1"
+    :rules="rules"
+  >
+    <h3 class="Login_title">My</h3>
+    <!--账号-->
+    <el-form-item label="Email" prop="email">
+      <el-input
+        type="email"
+        v-model="form1.email"
+        placeholder="Input your Email"
+      ></el-input>
+    </el-form-item>
+    <!--密码-->
+    <el-form-item label="Pwd" prop="password">
+      <el-input
+        type="password"
+        v-model="form1.password"
+        placeholder="Input your Password"
+      ></el-input>
+    </el-form-item>
+    <!-- 角色选择框 -->
+    <!-- <el-form-item label="Actor">
+      <el-radio style="margin-left: 40px" v-model="form1.actor" label="Tenant"
+        >Tenant</el-radio
+      >
+      <el-radio v-model="form1.actor" label="Landlord">Landlord</el-radio>
+    </el-form-item> -->
+    <!--忘记密码-->
+    <!-- <el-form-item>
+      <el-link :underline="false" @click="fpwd">Forget Password?</el-link>
+    </el-form-item> -->
 
-    <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-  <el-form-item label="密码" prop="pass">
-    <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
-  </el-form-item>
-  <el-form-item label="确认密码" prop="checkPass">
-    <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
-  </el-form-item>
-  <el-form-item label="年龄" prop="age">
-    <el-input v-model.number="ruleForm.age"></el-input>
-  </el-form-item>
-  <el-form-item>
-    <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
-    <el-button @click="resetForm('ruleForm')">重置</el-button>
-  </el-form-item>
-</el-form>
+    <!--登录按钮-->
+    <el-form-item>
+      <el-row class="Button">
+        <el-button type="primary" @click="submitForm">Login</el-button>
+        &ensp; &ensp; &ensp; &ensp;&ensp; &ensp;&ensp; &ensp;
 
-  </el-main>
-   </el-container>
+        <!--注册按钮   ('form')-->
 
-
-  </template>
-
-
-<script>
-  export default {
-    data() {
-      var checkAge = (rule, value, callback) => {
-        if (!value) {
-          return callback(new Error('年龄不能为空'));
-        }
-        setTimeout(() => {
-          if (!Number.isInteger(value)) {
-            callback(new Error('请输入数字值'));
-          } else {
-            if (value < 18) {
-              callback(new Error('必须年满18岁'));
-            } else {
-              callback();
-            }
-          }
-        }, 1000);
-      };
-      var validatePass = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入密码'));
-        } else {
-          if (this.ruleForm.checkPass !== '') {
-            this.$refs.ruleForm.validateField('checkPass');
-          }
-          callback();
-        }
-      };
-      var validatePass2 = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请再次输入密码'));
-        } else if (value !== this.ruleForm.pass) {
-          callback(new Error('两次输入密码不一致!'));
-        } else {
-          callback();
-        }
-      };
-      return {
-        ruleForm: {
-          pass: '',
-          checkPass: '',
-          age: ''
-        },
-        rules: {
-          pass: [
-            { validator: validatePass, trigger: 'blur' }
-          ],
-          checkPass: [
-            { validator: validatePass2, trigger: 'blur' }
-          ],
-          age: [
-            { validator: checkAge, trigger: 'blur' }
-          ]
-        }
-      };
-    },
-    methods: {
-      submitForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            alert('submit!');
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },
-      resetForm(formName) {
-        this.$refs[formName].resetFields();
-      }
-    }
-  }
-</script>
-
+        <el-button type="primary" @click="register">Register</el-button>
+      </el-row>
+    </el-form-item>
+  </el-form>
+</template>
 
 <style>
-  .el-header, .el-footer {
-    background-color: #B3C0D1;
-    color: #333;
-    text-align: center;
-    line-height: 60px;
-  }
-  
- 
-  
-  .el-main {
-    background-color: #E9EEF3;
-    color: #333;
-    text-align: center;
-    line-height: 160px;
-  }
-  
-
-
-  
-  
+.Login-container {
+  width: 350px;
+  border: 1px solid #eaeaea;
+  margin: 180px auto;
+  padding: 35px 35px 15px 35px;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 0 25px #cac6c6;
+}
+.el-input {
+  width: 198px;
+}
 </style>
 
-  
+<script>
+import UserService from "../Services/UserService"
+export default {
+  data() {
+    return {
+      form1: {
+        email: "",
+        password: "",
+      },
+      rules: {
+        email: [
+          {
+            required: true,
+            message: "Please input your email!",
+            trigger: "blur",
+          },
+        ],
+
+        password: [
+          {
+            required: true,
+            message: "Please input your password!",
+            trigger: "blur",
+          },
+        ],
+      },
+    };
+  },
+  methods: {
+    // 登录
+    submitForm() {
+      UserService.login(this.form1)
+        .then((response) => {
+          let res = response.data;
+          //转换字符串
+          let rowval = {
+            id: res.id,
+            email: res.email,
+            // landlordid: res.landlord.id,
+            // tenantid: res.tenant.id,
+            username: res.username,
+            pic: res.pic,
+            actor: this.form1.actor,
+          };
+          //设置taken
+          if (
+            this.form1.email == res.email &&
+            this.form1.password == res.password
+          ) {
+            this.$message.success(res.message);
+            this.$router.push("/home");
+            localStorage.setItem("token", JSON.stringify(rowval));
+          } else {
+            alert(res);
+          }
+        })
+        .catch((error) => {
+          alert(error.response.data);
+        });
+    },
+    register() {
+      this.$router.push({ name: "Register" });
+    },
+
+    fpwd() {
+      this.$router.push({ name: "Fpwd" });
+    },
+  },
+};
+</script>
